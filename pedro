@@ -1,0 +1,194 @@
+
+Pedro Moreira<pedromoreirac@hotmail.com>
+
+FERNANDA CAROLINA ARMANDO DUARTE
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Melancholic Cloud Gallery</title>
+<script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+<style>
+body {
+margin: 0;
+overflow: hidden;
+background-color: #FEF4D2; /* Light cream background /
+}
+/* Cinematic Grain Overlay /
+.noise-overlay {
+position: absolute;
+top: 0;
+left: 0;
+width: 100vw;
+height: 100vh;
+pointer-events: none; /* Let clicks pass through to A-Frame canvas /
+z-index: 9999;
+background-color: #A993FF; /* Purple tint as requested /
+background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.4"/%3E%3C/svg%3E');
+opacity: 0.35; /* Subtle grain visibility /
+mix-blend-mode: multiply; /* Blends the purple grain into the light background smoothly /
+}
+/* Minimal UI instruction /
+.ui-layer {
+position: absolute;
+bottom: 20px;
+left: 50%;
+transform: translateX(-50%);
+color: rgba(50, 50, 50, 0.8);
+font-family: 'Inter', sans-serif;
+font-size: 14px;
+z-index: 10000;
+pointer-events: none;
+text-align: center;
+text-shadow: 0px 1px 2px rgba(255,255,255,0.8);
+}
+</style>
+<script>
+// Custom A-Frame component to generate clustered clouds with line-art overlay
+AFRAME.registerComponent('cloud-cluster', {
+schema: {
+numSpheres: { type: 'number', default: 6 },
+spread: { type: 'number', default: 2.0 },
+color1: { type: 'color', default: '#FEF4D2' }, // Cream
+color2: { type: 'color', default: '#A6E0FF' }, // Light Blue
+wireColor: { type: 'color', default: '#A6E0FF' }, // Line art color
+opacity: { type: 'number', default: 0.85 }
+},
+init: function () {
+const el = this.el;
+const data = this.data;
+for (let i = 0; i < data.numSpheres; i++) {
+// Randomize positions slightly to create an organic cloud shape
+const rx = (Math.random() - 0.5) * data.spread;
+const ry = (Math.random() - 0.5) * (data.spread * 0.5); // Flatter on the Y axis
+const rz = (Math.random() - 0.5) * data.spread;
+const radius = 0.8 + Math.random() * 1.5;
+// Pick randomly between color1 and color2 for a mixed cloud effect
+const isColor1 = Math.random() > 0.5;
+const chosenColor = isColor1 ? data.color1 : data.color2;
+// 1. Create the solid, semi-transparent sphere
+const solid = document.createElement('a-sphere');
+solid.setAttribute('position', `${rx} ${ry} ${rz}`);
+solid.setAttribute('radius', radius);
+solid.setAttribute('color', chosenColor);
+solid.setAttribute('opacity', data.opacity);
+solid.setAttribute('transparent', 'true');
+solid.setAttribute('roughness', 1.0);
+// 2. Create the wireframe (line art) sphere, slightly larger
+const wire = document.createElement('a-sphere');
+wire.setAttribute('position', `${rx} ${ry} ${rz}`);
+wire.setAttribute('radius', radius * 1.02); // Tighter overlap to keep it subtle
+wire.setAttribute('color', data.wireColor);
+wire.setAttribute('wireframe', 'true');
+wire.setAttribute('opacity', '0.25'); // Subtle line art
+el.appendChild(solid);
+el.appendChild(wire);
+}
+}
+});
+</script>
+</head>
+<body>
+<!-- Cinematic SVG Noise Layer -->
+<div class="noise-overlay"></div>
+<div class="ui-layer">
+Use WASD to move &middot; Click and drag to look around
+</div>
+<!-- A-Frame Scene -->
+<!-- Fog added for the "mist at the base" blending into the horizon -->
+<a-scene background="color: #FEF4D2" fog="type: exponential; color: #FEF4D2; density: 0.05" renderer="antialias: true">
+<!-- Asset Management -->
+<a-assets>
+<img id="art1" src="https://picsum.photos/id/1015/800/1000" crossorigin="anonymous">
+<img id="art2" src="https://picsum.photos/id/1037/800/1000" crossorigin="anonymous">
+<img id="art3" src="https://picsum.photos/id/1043/800/1000" crossorigin="anonymous">
+<img id="art4" src="https://picsum.photos/id/1050/800/1000" crossorigin="anonymous">
+<img id="art5" src="https://picsum.photos/id/1062/800/1000" crossorigin="anonymous">
+<img id="art6" src="https://picsum.photos/id/1074/800/1000" crossorigin="anonymous">
+</a-assets>
+<!-- LIGHTING -->
+<!-- Soft, balanced ambient light matching the background -->
+<a-light type="ambient" color="#ffffff" intensity="0.85"></a-light>
+<!-- Gentle central glow to add dimension to the mist -->
+<a-light type="point" color="#A6E0FF" intensity="0.6" position="0 3 0" distance="20"></a-light>
+<a-light type="directional" color="#FEF4D2" intensity="0.4" position="-1 5 3"></a-light>
+<!-- GALLERY SETUP -->
+<!-- Removed the central floor clouds to avoid blocking artworks, relying on fog for the mist base -->
+<!-- Artworks arranged in a circle inside "Capelinhas" (Chapels). -->
+<!-- Artwork 1 (0 degrees) -->
+<a-entity rotation="0 0 0">
+<!-- Chapel Base Wall -->
+<a-box position="0 1.5 -6" width="2.6" height="3.2" depth="0.3" color="#ffffff" shadow></a-box>
+<!-- Chapel Pitched Roof -->
+<a-cone position="0 3.6 -6" radius-bottom="2" radius-top="0" height="1.2" segments-radial="4" rotation="0 45 0" color="#f8f9fa" shadow></a-cone>
+<!-- Frame/Niche -->
+<a-box position="0 1.6 -5.84" width="2" height="2.6" depth="0.05" color="#e9ecef"></a-box>
+<!-- The Art -->
+<a-image src="#art1" position="0 1.6 -5.81" width="1.8" height="2.4"></a-image>
+<!-- Spot lighting for this specific artwork -->
+<a-light type="spot" color="#ffffff" intensity="1.0" position="0 4 -4.5" rotation="-60 0 0" angle="40" penumbra="0.4"></a-light>
+</a-entity>
+<!-- Artwork 2 (60 degrees) -->
+<a-entity rotation="0 60 0">
+<a-box position="0 1.5 -6" width="2.6" height="3.2" depth="0.3" color="#ffffff" shadow></a-box>
+<a-cone position="0 3.6 -6" radius-bottom="2" radius-top="0" height="1.2" segments-radial="4" rotation="0 45 0" color="#f8f9fa" shadow></a-cone>
+<a-box position="0 1.6 -5.84" width="2" height="2.6" depth="0.05" color="#e9ecef"></a-box>
+<a-image src="#art2" position="0 1.6 -5.81" width="1.8" height="2.4"></a-image>
+<a-light type="spot" color="#ffffff" intensity="1.0" position="0 4 -4.5" rotation="-60 0 0" angle="40" penumbra="0.4"></a-light>
+</a-entity>
+<!-- Artwork 3 (120 degrees) -->
+<a-entity rotation="0 120 0">
+<a-box position="0 1.5 -6" width="2.6" height="3.2" depth="0.3" color="#ffffff" shadow></a-box>
+<a-cone position="0 3.6 -6" radius-bottom="2" radius-top="0" height="1.2" segments-radial="4" rotation="0 45 0" color="#f8f9fa" shadow></a-cone>
+<a-box position="0 1.6 -5.84" width="2" height="2.6" depth="0.05" color="#e9ecef"></a-box>
+<a-image src="#art3" position="0 1.6 -5.81" width="1.8" height="2.4"></a-image>
+<a-light type="spot" color="#ffffff" intensity="1.0" position="0 4 -4.5" rotation="-60 0 0" angle="40" penumbra="0.4"></a-light>
+</a-entity>
+<!-- Artwork 4 (180 degrees) -->
+<a-entity rotation="0 180 0">
+<a-box position="0 1.5 -6" width="2.6" height="3.2" depth="0.3" color="#ffffff" shadow></a-box>
+<a-cone position="0 3.6 -6" radius-bottom="2" radius-top="0" height="1.2" segments-radial="4" rotation="0 45 0" color="#f8f9fa" shadow></a-cone>
+<a-box position="0 1.6 -5.84" width="2" height="2.6" depth="0.05" color="#e9ecef"></a-box>
+<a-image src="#art4" position="0 1.6 -5.81" width="1.8" height="2.4"></a-image>
+<a-light type="spot" color="#ffffff" intensity="1.0" position="0 4 -4.5" rotation="-60 0 0" angle="40" penumbra="0.4"></a-light>
+</a-entity>
+<!-- Artwork 5 (240 degrees) -->
+<a-entity rotation="0 240 0">
+<a-box position="0 1.5 -6" width="2.6" height="3.2" depth="0.3" color="#ffffff" shadow></a-box>
+<a-cone position="0 3.6 -6" radius-bottom="2" radius-top="0" height="1.2" segments-radial="4" rotation="0 45 0" color="#f8f9fa" shadow></a-cone>
+<a-box position="0 1.6 -5.84" width="2" height="2.6" depth="0.05" color="#e9ecef"></a-box>
+<a-image src="#art5" position="0 1.6 -5.81" width="1.8" height="2.4"></a-image>
+<a-light type="spot" color="#ffffff" intensity="1.0" position="0 4 -4.5" rotation="-60 0 0" angle="40" penumbra="0.4"></a-light>
+</a-entity>
+<!-- Artwork 6 (300 degrees) -->
+<a-entity rotation="0 300 0">
+<a-box position="0 1.5 -6" width="2.6" height="3.2" depth="0.3" color="#ffffff" shadow></a-box>
+<a-cone position="0 3.6 -6" radius-bottom="2" radius-top="0" height="1.2" segments-radial="4" rotation="0 45 0" color="#f8f9fa" shadow></a-cone>
+<a-box position="0 1.6 -5.84" width="2" height="2.6" depth="0.05" color="#e9ecef"></a-box>
+<a-image src="#art6" position="0 1.6 -5.81" width="1.8" height="2.4"></a-image>
+<a-light type="spot" color="#ffffff" intensity="1.0" position="0 4 -4.5" rotation="-60 0 0" angle="40" penumbra="0.4"></a-light>
+</a-entity>
+
+<!-- ANIMATION: PERIPHERAL ORBITING CLOUDS (Ensured to be placed far outside) -->
+<!-- This root entity rotates infinitely, carrying distant cloud clusters with it -->
+<a-entity animation="property: rotation; to: 0 360 0; loop: true; dur: 90000; easing: linear">
+<a-entity cloud-cluster="numSpheres: 12; spread: 4" position="20 5 0"></a-entity>
+<a-entity cloud-cluster="numSpheres: 10; spread: 3" position="-16 7 14"></a-entity>
+<a-entity cloud-cluster="numSpheres: 15; spread: 5" position="12 -1 -18"></a-entity>
+<a-entity cloud-cluster="numSpheres: 9; spread: 3.5" position="-22 2 -10"></a-entity>
+<a-entity cloud-cluster="numSpheres: 14; spread: 6" position="0 9 22"></a-entity>
+</a-entity>
+<!-- Secondary orbiting ring moving in the opposite direction for parallax -->
+<a-entity animation="property: rotation; to: 0 -360 0; loop: true; dur: 120000; easing: linear">
+<a-entity cloud-cluster="numSpheres: 20; spread: 6" position="25 -2 15"></a-entity>
+<a-entity cloud-cluster="numSpheres: 15; spread: 4" position="-22 12 -20"></a-entity>
+</a-entity>
+
+<!-- CAMERA AND CONTROLS -->
+<a-entity position="0 1.6 0">
+<a-camera look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 15"></a-camera>
+</a-entity>
+</a-scene>
+</body>
+</html>
