@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Galeria do Pesadelo — Espinhos &amp; Lâminas</title>
+<!-- A-Frame Library -->
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<!-- Tailwind CSS para a interface Overlay -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background-color: #050205;
+    font-family: 'Crimson Text', serif;
+  }
+  .font-gothic {
+    font-family: 'Cinzel Decorative', serif;
+  }
+  /* Efeito de vinheta sombria na tela */
+  #vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(0,0,0,0) 45%, rgba(10, 0, 5, 0.85) 100%);
+    z-index: 10;
+  }
+  /* Animação suave para o modal */
+  #art-modal {
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  #art-modal.hidden-modal {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95);
+  }
+  #art-modal.visible-modal {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+  }
+</style>
+</head>
+<body>
+
+<!-- Vinheta atmosférica -->
+<div id="vignette"></div>
+
+<!-- HUD Superior com Instruções -->
+<div class="fixed top-4 left-4 z-20 pointer-events-none select-none">
+  <h1 class="font-gothic text-xl md:text-2xl text-red-500 drop-shadow-[0_2px_10px_rgba(220,38,38,0.8)] tracking-wider">
+    FLORESTA DOS PESADELOS
+  </h1>
+  <p class="text-slate-300 text-sm md:text-base bg-black/60 backdrop-blur-sm px-3 py-1 rounded border border-red-900/50 mt-1">
+    Arraste para olhar • Use <b>WASD / Setas</b> para andar • <b>Clique</b> nas obras para inspecionar
+  </p>
+</div>
+
+<!-- TELA OVERLAY (MODAL) PARA EXIBIÇÃO DA OBRA -->
+<div id="art-modal" class="hidden-modal fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+  <div class="relative max-w-4xl w-full bg-gradient-to-b from-[#14070c] via-[#0b0710] to-[#060308] border-2 border-red-900/80 rounded-lg shadow-[0_0_50px_rgba(185,28,28,0.45)] overflow-hidden flex flex-col md:flex-row">
+
+    <!-- Botão Fechar -->
+    <button id="close-modal-btn" aria-label="Fechar obra" class="absolute top-3 right-3 z-10 w-10 h-10 rounded-full bg-red-950/90 hover:bg-red-700 text-red-200 hover:text-white border border-red-500/50 flex items-center justify-center text-xl font-bold transition cursor-pointer shadow-lg">
+      ✕
+    </button>
+
+    <!-- Imagem da Obra Ampliada -->
+    <div class="md:w-3/5 bg-black flex items-center justify-center p-4 border-b md:border-b-0 md:border-r border-red-950">
+      <img id="modal-image" src="" alt="Obra selecionada" class="max-h-[65vh] w-auto object-contain rounded shadow-[0_0_25px_rgba(0,0,0,0.9)] border border-slate-800" />
+    </div>
+
+    <!-- Detalhes da Obra -->
+    <div class="md:w-2/5 p-6 md:p-8 flex flex-col justify-between text-slate-200">
+      <div>
+        <span id="modal-tag" class="inline-block text-xs uppercase tracking-[0.25em] text-emerald-400 border border-emerald-800/60 bg-emerald-950/40 px-2.5 py-1 rounded mb-3">
+          Relíquia Sombria
+        </span>
+        <h2 id="modal-title" class="font-gothic text-2xl md:text-3xl text-red-400 mb-2 leading-tight">
+          Título da Obra
+        </h2>
+        <p id="modal-artist" class="text-sm italic text-slate-400 mb-5 border-b border-red-950/80 pb-3">
+          Artista / Ano
+        </p>
+        <p id="modal-desc" class="text-base md:text-lg leading-relaxed text-slate-300">
+          Descrição detalhada da obra.
+        </p>
+      </div>
+
+      <button id="close-modal-footer" class="mt-8 w-full py-2.5 px-4 bg-gradient-to-r from-red-950 via-red-900 to-red-950 hover:from-red-800 hover:to-red-800 text-red-100 font-gothic tracking-widest text-sm rounded border border-red-600/50 transition cursor-pointer shadow-md">
+        RETORNAR À NÉVOA
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CENA 3D A-FRAME -->
+<a-scene
+  fog="type: exponential; color: #0c131d; density: 0.085"
+  renderer="antialias: true; colorManagement: true; toneMapping: ACESFilmic"
+  cursor="rayOrigin: mouse"
+  raycaster="objects: .clickable">
+
+  <!-- ASSETS -->
+  <a-assets timeout="8000">
+    <img id="img-obra-1" crossorigin="anonymous" src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1000&q=80" />
+    <img id="img-obra-2" crossorigin="anonymous" src="https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=1000&q=80" />
+    <img id="img-obra-3" crossorigin="anonymous" src="https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?auto=format&fit=crop&w=1000&q=80" />
+  </a-assets>
+
+  <!-- Céu Noturno / Névoa Profunda -->
+  <a-sky color="#070b12"></a-sky>
+
+  <!-- Chão Sombrio do Pântano / Caldeira -->
+  <a-plane
+    position="0 0 0"
+    rotation="-90 0 0"
+    width="80"
+    height="80"
+    color="#080c10"
+    roughness="0.9"
+    metalness="0.2">
+  </a-plane>
+
+  <!-- ILUMINAÇÃO DRAMÁTICA -->
+  <a-light type="ambient" color="#1a2639" intensity="0.65"></a-light>
+  <a-light type="directional" color="#3b6e8c" intensity="0.9" position="0 12 -15"></a-light>
+  <a-light type="point" color="#dc2626" intensity="2.2" distance="18" position="-4 3.5 -4"></a-light>
+  <a-light type="point" color="#b91c1c" intensity="2.0" distance="18" position="4 3.5 -4"></a-light>
+  <a-light type="point" color="#10b981" intensity="1.6" distance="14" position="0 2.5 -6"></a-light>
+
+  <!-- CÂMERA E CONTROLES DO JOGADOR -->
+  <a-entity id="rig" position="0 1.6 3.5" wasd-controls="acceleration: 22">
+    <a-camera look-controls="pointerLockEnabled: false">
+      <a-ring
+        position="0 0 -1"
+        radius-inner="0.008"
+        radius-outer="0.014"
+        material="color: #ef4444; shader: flat; opacity: 0.75">
+      </a-ring>
+    </a-camera>
+  </a-entity>
+
+  <!-- CONTÊINER ONDE O SCRIPT VAI GERAR ESPINHOS, GARRAS METÁLICAS E NÉVOA -->
+  <a-entity id="nightmare-environment"></a-entity>
+
+  <!-- OBRA 1 (ESQUERDA) -->
+  <a-entity position="-4.2 2.1 -4.5" rotation="0 28 0">
+    <a-box width="2.5" height="3.2" depth="0.18" color="#0d090e" metalness="0.7" roughness="0.3"></a-box>
+    <a-box width="2.32" height="3.02" depth="0.2" color="#3f0d12" metalness="0.8" roughness="0.2"></a-box>
+    <a-plane
+      class="clickable art-piece"
+      data-id="0"
+      position="0 0 0.11"
+      width="2.1"
+      height="2.8"
+      material="src: #img-obra-1; shader: standard; roughness: 0.4"
+      animation__hover="property: scale; to: 1.04 1.04 1.04; dur: 250; startEvents: mouseenter"
+      animation__leave="property: scale; to: 1 1 1; dur: 250; startEvents: mouseleave">
+    </a-plane>
+    <a-cone position="-1.25 1.5 0.1" rotation="0 0 35" radius-bottom="0.08" radius-top="0.002" height="0.9" color="#71717a" metalness="0.95" roughness="0.15"></a-cone>
+    <a-cone position="1.25 1.5 0.1" rotation="0 0 -35" radius-bottom="0.08" radius-top="0.002" height="0.9" color="#71717a" metalness="0.95" roughness="0.15"></a-cone>
+    <a-cylinder position="0 -1.9 0" radius="0.35" height="0.8" color="#09070a" metalness="0.6"></a-cylinder>
+  </a-entity>
+
+  <!-- OBRA 2 (CENTRO - DESTAQUE) -->
+  <a-entity position="0 2.3 -6.2" rotation="0 0 0">
+    <a-box width="2.8" height="3.5" depth="0.2" color="#090c0e" metalness="0.7" roughness="0.3"></a-box>
+    <a-box width="2.6" height="3.3" depth="0.22" color="#064e3b" metalness="0.8" roughness="0.25"></a-box>
+    <a-plane
+      class="clickable art-piece"
+      data-id="1"
+      position="0 0 0.12"
+      width="2.35"
+      height="3.05"
+      material="src: #img-obra-2; shader: standard; roughness: 0.4"
+      animation__hover="property: scale; to: 1.04 1.04 1.04; dur: 250; startEvents: mouseenter"
+      animation__leave="property: scale; to: 1 1 1; dur: 250; startEvents: mouseleave">
+    </a-plane>
+    <a-cone position="-1.1 1.9 0.05" rotation="0 0 20" radius-bottom="0.16" radius-top="0.01" height="1.3" color="#090a0f" roughness="0.5"></a-cone>
+    <a-cone position="1.1 1.9 0.05" rotation="0 0 -20" radius-bottom="0.16" radius-top="0.01" height="1.3" color="#090a0f" roughness="0.5"></a-cone>
+    <a-cylinder position="0 -2.05 0" radius="0.4" height="0.9" color="#09070a" metalness="0.6"></a-cylinder>
+  </a-entity>
+
+  <!-- OBRA 3 (DIREITA) -->
+  <a-entity position="4.2 2.1 -4.5" rotation="0 -28 0">
+    <a-box width="2.5" height="3.2" depth="0.18" color="#0d090e" metalness="0.7" roughness="0.3"></a-box>
+    <a-box width="2.32" height="3.02" depth="0.2" color="#3f0d12" metalness="0.8" roughness="0.2"></a-box>
+    <a-plane
+      class="clickable art-piece"
+      data-id="2"
+      position="0 0 0.11"
+      width="2.1"
+      height="2.8"
+      material="src: #img-obra-3; shader: standard; roughness: 0.4"
+      animation__hover="property: scale; to: 1.04 1.04 1.04; dur: 250; startEvents: mouseenter"
+      animation__leave="property: scale; to: 1 1 1; dur: 250; startEvents: mouseleave">
+    </a-plane>
+    <a-cone position="-1.25 1.5 0.1" rotation="0 0 35" radius-bottom="0.08" radius-top="0.002" height="0.9" color="#71717a" metalness="0.95" roughness="0.15"></a-cone>
+    <a-cone position="1.25 1.5 0.1" rotation="0 0 -35" radius-bottom="0.08" radius-top="0.002" height="0.9" color="#71717a" metalness="0.95" roughness="0.15"></a-cone>
+    <a-cylinder position="0 -1.9 0" radius="0.35" height="0.8" color="#09070a" metalness="0.6"></a-cylinder>
+  </a-entity>
+</a-scene>
+
+<script>
+const artworksData = [
+  {
+    tag: "ATO I • O DESPERTAR",
+    title: "A Muralha de Espinhos Negros",
+    artist: "Crônicas do Reino Esquecido, 1984",
+    image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1000&q=80",
+    description: "Erguida por magia antiga e rancor profundo, esta barreira viva de espinhos retorcidos impede que qualquer luz atravesse a floresta enevoada. Dizem que os galhos se movem sozinhos quando sentem medo."
+  },
+  {
+    tag: "ATO II • A MALDIÇÃO",
+    title: "O Silêncio da Névoa Azul",
+    artist: "Arquivo das Sombras, 1987",
+    image: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=1000&q=80",
+    description: "No coração do bosque, onde a neblina nunca se dissipa, uma presença observa entre os troncos entrelaçados. O frio cortante anuncia que a fronteira entre a vigília e o pesadelo deixou de existir."
+  },
+  {
+    tag: "ATO III • A LÂMINA",
+    title: "Ecos da Rua Elm",
+    artist: "Manuscrito do Sono Profundo, 1989",
+    image: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?auto=format&fit=crop&w=1000&q=80",
+    description: "O som metálico arranhando os espinhos ressoa na escuridão. Aqui, dormir não traz descanso — apenas o encontro inevitável com as garras que habitam o outro lado do espelho."
+  }
+];
+
+function createFallbackTexture(label, accentColor) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 680;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#0b0710";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth = 8;
+  ctx.strokeRect(24, 24, canvas.width - 48, canvas.height - 48);
+  ctx.fillStyle = "#f8fafc";
+  ctx.font = "bold 28px Georgia";
+  ctx.textAlign = "center";
+  ctx.fillText(label, canvas.width / 2, canvas.height / 2);
+  return canvas.toDataURL("image/png");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Garante fallback caso alguma imagem externa não carregue em rede restrita
+  const assetFallbacks = [
+    { id: "img-obra-1", label: "ATO I • ESPINHOS", color: "#dc2626" },
+    { id: "img-obra-2", label: "ATO II • NÉVOA", color: "#10b981" },
+    { id: "img-obra-3", label: "ATO III • LÂMINA", color: "#e11d48" }
+  ];
+  assetFallbacks.forEach(({ id, label, color }) => {
+    const imgEl = document.getElementById(id);
+    if (!imgEl) return;
+    imgEl.addEventListener("error", () => {
+      const dataUrl = createFallbackTexture(label, color);
+      imgEl.removeAttribute("crossorigin");
+      imgEl.src = dataUrl;
+    }, { once: true });
+  });
+
+  const envContainer = document.getElementById("nightmare-environment");
+
+  // 1. Troncos e espinhos colossais
+  for (let i = 0; i < 45; i++) {
+    const angle = (i / 45) * Math.PI * 2;
+    const radius = 6.8 + Math.random() * 11;
+    const x = Math.cos(angle) * radius;
+    const z = Math.sin(angle) * radius - 3;
+
+    if (z > 2 && Math.abs(x) < 4) continue;
+
+    const trunk = document.createElement("a-entity");
+    trunk.setAttribute("position", `${x} 0 ${z}`);
+    trunk.setAttribute("rotation", `${(Math.random() - 0.5) * 25} ${Math.random() * 360} ${(Math.random() - 0.5) * 25}`);
+
+    const height = 5 + Math.random() * 7;
+    const mainCone = document.createElement("a-cone");
+    mainCone.setAttribute("radius-bottom", 0.35 + Math.random() * 0.45);
+    mainCone.setAttribute("radius-top", "0.02");
+    mainCone.setAttribute("height", height);
+    mainCone.setAttribute("position", `0 ${height / 2} 0`);
+    mainCone.setAttribute("color", i % 3 === 0 ? "#18090c" : "#0b111a");
+    mainCone.setAttribute("roughness", "0.85");
+    trunk.appendChild(mainCone);
+
+    const thornCount = 4 + Math.floor(Math.random() * 4);
+    for (let t = 0; t < thornCount; t++) {
+      const thorn = document.createElement("a-cone");
+      const tY = 1 + Math.random() * (height - 1.5);
+      const isMetallic = Math.random() > 0.65;
+
+      thorn.setAttribute("radius-bottom", isMetallic ? "0.05" : "0.12");
+      thorn.setAttribute("radius-top", "0.002");
+      thorn.setAttribute("height", isMetallic ? 1.4 : 1.8);
+      thorn.setAttribute("position", `0 ${tY} 0`);
+      thorn.setAttribute("rotation", `${45 + Math.random() * 40} ${t * 95} 0`);
+      thorn.setAttribute("color", isMetallic ? "#9ca3af" : "#12090d");
+      if (isMetallic) {
+        thorn.setAttribute("metalness", "0.95");
+        thorn.setAttribute("roughness", "0.15");
+      }
+      trunk.appendChild(thorn);
+    }
+
+    envContainer.appendChild(trunk);
+  }
+
+  // 2. Arcos de espinhos acima das obras
+  for (let a = 0; a < 14; a++) {
+    const arch = document.createElement("a-torus");
+    const zPos = -2 - a * 1.1;
+    arch.setAttribute("position", `${(Math.random() - 0.5) * 3} 3.8 ${zPos}`);
+    arch.setAttribute("rotation", `${(Math.random() - 0.5) * 30} ${(Math.random() - 0.5) * 40} ${Math.random() * 180}`);
+    arch.setAttribute("radius", 4.5 + Math.random() * 2.5);
+    arch.setAttribute("radius-tubular", 0.08 + Math.random() * 0.08);
+    arch.setAttribute("arc", "190");
+    arch.setAttribute("color", "#090d14");
+    arch.setAttribute("roughness", "0.9");
+    envContainer.appendChild(arch);
+  }
+
+  // 3. Bancos de névoa flutuantes
+  for (let f = 0; f < 22; f++) {
+    const fogPatch = document.createElement("a-sphere");
+    const fx = (Math.random() - 0.5) * 18;
+    const fz = -10 + Math.random() * 14;
+    fogPatch.setAttribute("position", `${fx} 0.35 ${fz}`);
+    fogPatch.setAttribute("scale", `${2.5 + Math.random() * 3} 0.35 ${2.5 + Math.random() * 3}`);
+    fogPatch.setAttribute("material", `color: ${f % 2 === 0 ? '#1e3a5f' : '#3b0d11'}; opacity: 0.16; transparent: true; depthWrite: false`);
+    fogPatch.setAttribute("animation", `property: position; to: ${fx + 1.2} 0.45 ${fz}; dir: alternate; dur: ${5000 + Math.random() * 4000}; loop: true; easing: easeInOutSine`);
+    envContainer.appendChild(fogPatch);
+  }
+
+  // 4. Controle do Modal de Inspeção
+  const modal = document.getElementById("art-modal");
+  const modalImg = document.getElementById("modal-image");
+  const modalTag = document.getElementById("modal-tag");
+  const modalTitle = document.getElementById("modal-title");
+  const modalArtist = document.getElementById("modal-artist");
+  const modalDesc = document.getElementById("modal-desc");
+  const closeBtn = document.getElementById("close-modal-btn");
+  const closeFooterBtn = document.getElementById("close-modal-footer");
+
+  function openArtModal(index) {
+    const art = artworksData[index];
+    if (!art) return;
+    const assetImg = document.getElementById(`img-obra-${index + 1}`);
+    modalImg.src = (assetImg && assetImg.src) ? assetImg.src : art.image;
+    modalTag.textContent = art.tag;
+    modalTitle.textContent = art.title;
+    modalArtist.textContent = art.artist;
+    modalDesc.textContent = art.description;
+
+    modal.classList.remove("hidden-modal");
+    modal.classList.add("visible-modal");
+  }
+
+  function closeArtModal() {
+    modal.classList.remove("visible-modal");
+    modal.classList.add("hidden-modal");
+  }
+
+  document.querySelectorAll(".art-piece").forEach((piece) => {
+    piece.addEventListener("click", () => {
+      const id = parseInt(piece.getAttribute("data-id"), 10);
+      openArtModal(id);
+    });
+  });
+
+  closeBtn.addEventListener("click", closeArtModal);
+  closeFooterBtn.addEventListener("click", closeArtModal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeArtModal();
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeArtModal();
+  });
+});
+</script>
+</body>
+</html>
